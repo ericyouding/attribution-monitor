@@ -1,0 +1,25 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: 'PromoteIQ-Playground (b558a354-8f0b-4461-8876-9d1e8b56360f)'
+    subscriptionId: 'b558a354-8f0b-4461-8876-9d1e8b56360f'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: 'a-attribution-eus-peered-rg'
+    location: 'East US'
+    templateLocation: 'URL of the file'
+    csmFileLink: 'https://raw.githubusercontent.com/ericyouding/attribution-monitor/main/template/azuredeploy.json'
+    overrideParameters: '-projectName data-test'
+    deploymentMode: 'Incremental'
+    deploymentName: 'DeployPipelineTemplate'
