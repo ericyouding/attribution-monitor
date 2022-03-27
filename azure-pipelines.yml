@@ -21,4 +21,3 @@ steps:
     templateLocation: 'URL of the file'
     csmFileLink: 'https://raw.githubusercontent.com/ericyouding/attribution-monitor/main/template/azuredeploy.json'
     deploymentMode: 'Incremental'
-    deploymentName: 'DeployPipelineTemplate'
