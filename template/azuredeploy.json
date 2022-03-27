@@ -1,0 +1,2237 @@
+{
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "workbookDisplayName": {
+        "type": "string",
+        "defaultValue": "Attribution2.0",
+        "metadata": {
+          "description": "The friendly name for the workbook that is used in the Gallery or Saved List.  This name must be unique within a resource group."
+        }
+      },
+      "workbookType": {
+        "type": "string",
+        "defaultValue": "workbook",
+        "metadata": {
+          "description": "The gallery that the workbook will been shown under. Supported values include workbook, tsg, etc. Usually, this is 'workbook'"
+        }
+      },
+      "workbookSourceId": {
+        "type": "string",
+        "defaultValue": "/subscriptions/949ee4ba-5c35-470e-8128-7c70c8746af4/resourceGroups/staging-data-etl-iad-dbw-main-rg/providers/Microsoft.Insights/components/staging-data-etl-iad-dbw-main-appinsights",
+        "metadata": {
+          "description": "The id of resource instance to which the workbook will be associated"
+        }
+      },
+      "workbookId": {
+        "type": "string",
+        "defaultValue": "[newGuid()]",
+        "metadata": {
+          "description": "The unique guid for this workbook instance"
+        }
+      }
+    },
+    "variables": {
+      "workbookContent": {
+        "version": "Notebook/1.0",
+        "items": [
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Task Execution Time Summary",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "bfd48357-31cf-46f0-bc79-7297c0932f0e",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeRange",
+                        "label": "Time Range",
+                        "type": 4,
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 172800000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            },
+                            {
+                              "durationMs": 5184000000
+                            },
+                            {
+                              "durationMs": 7776000000
+                            }
+                          ]
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "a6459581-3d2a-4252-86e3-5aa9c782e3aa",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Task",
+                        "type": 2,
+                        "isRequired": true,
+                        "multiSelect": true,
+                        "quote": "'",
+                        "delimiter": ",",
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n{\"value\":\"Attribution Conv Preprocess\", \"label\":\"Conversion Preprocess\"},\n{\"value\":\"Attribution Click And Imp Preprocess\", \"label\":\"Click&Imp Preprocess\"},\n{\"value\":\"Attribution Join\", \"label\":\"Join\"},\n{\"value\":\"attributionV2_rule_match\", \"label\":\"Rule Match\"}\n]",
+                        "defaultValue": "value::all"
+                      },
+                      {
+                        "id": "51446622-7a29-4bb8-aae8-66acb9c84814",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Bin",
+                        "type": 2,
+                        "isRequired": true,
+                        "value": "10m",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n    {\"label\": \"5min\", \"value\": \"5m\"},\n    {\"label\": \"10min\", \"value\": \"10m\"},\n    {\"label\": \"30min\", \"value\": \"30m\"},\n    {\"label\": \"1hour\", \"value\": \"1h\"}\n]"
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "name": "parameters - 9"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\" or message == \"ATTR_RULE_MATCH_END\"\n| extend task_name = tostring(customDimensions.name)\n| extend time_elapsed = case(message==\"SUMMARY\", toreal(customDimensions.execution_time),\n                                toreal(customDimensions.run_time))\n| where task_name in ({Task})\n| project timestamp, time_elapsed, task_name\n| summarize avg_time_elalpsed = avg(time_elapsed) by timestamp = bin(timestamp, {Bin}), task_name",
+                    "size": 0,
+                    "aggregation": 3,
+                    "showAnalytics": true,
+                    "title": "Execution Time",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "exportedParameters": [
+                      {
+                        "fieldName": "",
+                        "parameterName": "Row",
+                        "parameterType": 1
+                      },
+                      {
+                        "fieldName": "series",
+                        "parameterName": "selected_task_name",
+                        "parameterType": 1
+                      }
+                    ],
+                    "showExportToExcel": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "graphSettings": {
+                      "type": 0,
+                      "topContent": {
+                        "columnMatch": "task_name",
+                        "formatter": 1
+                      },
+                      "centerContent": {
+                        "columnMatch": "avg_time_elapsed",
+                        "formatter": 1,
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      },
+                      "nodeIdField": "task_name",
+                      "sourceIdField": "avg_time_elapsed",
+                      "targetIdField": "timestamp",
+                      "graphOrientation": 1,
+                      "showOrientationToggles": false,
+                      "nodeSize": null,
+                      "staticNodeSize": 100,
+                      "colorSettings": null,
+                      "hivesMargin": 5
+                    },
+                    "chartSettings": {
+                      "xAxis": "timestamp",
+                      "group": "task_name",
+                      "createOtherGroup": null,
+                      "showLegend": true,
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "rule_match",
+                          "label": "Rule Match"
+                        },
+                        {
+                          "seriesName": "Attribution Join",
+                          "label": "Join"
+                        },
+                        {
+                          "seriesName": "Attribution Click And Imp Preprocess",
+                          "label": "Click&Imp Preprocess"
+                        },
+                        {
+                          "seriesName": "Attribution Conv Preprocess",
+                          "label": "Conv Preprocess "
+                        }
+                      ],
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 24,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "100",
+                  "name": "Execution Time Query",
+                  "styleSettings": {
+                    "maxWidth": "100%"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\" or message == \"ATTR_RULE_MATCH_END\"\n| extend task_name = customDimensions.name\n| extend time_elapsed = case(message==\"SUMMARY\", toreal(customDimensions.execution_time),\n                                toreal(customDimensions.run_time))\n| where timestamp >= datetime_add('Minute', -1, extractjson(\"$.x\", '{Row}', typeof(datetime))) and \ntimestamp <= datetime_add('Minute', case({Bin} == '1h', 60, {Bin} == '30m', 30, {Bin} == '10m', 10, 5), extractjson(\"$.x\", '{Row}', typeof(datetime))) and task_name == '{selected_task_name}'\n| project timestamp, time_elapsed, run_id = customDimensions.job_run_id\n| order by timestamp\n\n//print datetime_add('minute', -5, extractjson(\"$.x\", '{Row}', typeof(datetime)))\n//print '{selected_task_name}'\n\n",
+                    "size": 1,
+                    "aggregation": 3,
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "exportFieldName": "",
+                    "exportParameterName": "ExecutionRowL2",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "gridSettings": {
+                      "sortBy": [
+                        {
+                          "itemKey": "timestamp",
+                          "sortOrder": 1
+                        }
+                      ]
+                    },
+                    "sortBy": [
+                      {
+                        "itemKey": "timestamp",
+                        "sortOrder": 1
+                      }
+                    ],
+                    "graphSettings": {
+                      "type": 0
+                    },
+                    "chartSettings": {
+                      "xAxis": "timestamp",
+                      "yAxis": [
+                        "time_elapsed"
+                      ],
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 24,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "Row",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Execution Sub Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where customDimensions.job_run_id == extractjson(\"$.run_id\", '{ExecutionRowL2}', typeof(string))\n| project timestamp, message, log=customDimensions\n| order by timestamp asc",
+                    "size": 0,
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "ExecutionRowL2",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Exeuction Line Query"
+                }
+              ]
+            },
+            "name": "Execution Time Group"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Join Attribution Status Summary",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "bfd48357-31cf-46f0-bc79-7297c0932f0e",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeRange",
+                        "label": "Time Range",
+                        "type": 4,
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 259200000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            }
+                          ]
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "51446622-7a29-4bb8-aae8-66acb9c84814",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Bin",
+                        "type": 2,
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n    {\"label\": \"5min\", \"value\": \"5m\"},\n    {\"label\": \"10min\", \"value\": \"10m\"},\n    {\"label\": \"30min\", \"value\": \"30m\"},\n    {\"label\": \"1hour\", \"value\": \"1h\"}\n]"
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "name": "Join Attribution Parameters"
+                },
+                {
+                  "type": 11,
+                  "content": {
+                    "version": "LinkItem/1.0",
+                    "style": "tabs",
+                    "links": [
+                      {
+                        "id": "de72a789-1c67-4e41-a25a-d7a69c81bbc0",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "Count",
+                        "subTarget": "Count",
+                        "style": "link"
+                      },
+                      {
+                        "id": "9898806f-53d7-4d9b-9f44-2cb0db493fec",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "Percentile",
+                        "subTarget": "Percentile",
+                        "style": "link"
+                      },
+                      {
+                        "id": "05c13da5-5a51-46ce-8d45-6a56781b5bea",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "qps",
+                        "subTarget": "qps",
+                        "style": "link"
+                      }
+                    ]
+                  },
+                  "name": "Rule Match Tabs"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.total_conversions), attributed_conversions = toreal(customDimensions.total_conversions) - toreal(customDimensions.total_unattributed_conversions), unattributed_conversions = toreal(customDimensions.total_unattributed_conversions)\n| where task_name == \"Attribution Join\"\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions\n| summarize total_conversions = sum(total_conversions), attributed_conversions = sum(attributed_conversions), unattributed_conversions = sum(unattributed_conversions) by timestamp = bin(timestamp, {Bin})",
+                    "size": 0,
+                    "title": "Attribution Count",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "sum_total_conversions",
+                          "label": "Total Conversions"
+                        },
+                        {
+                          "seriesName": "sum_attributed_conversions",
+                          "label": "Attributed Conversions"
+                        },
+                        {
+                          "seriesName": "sum_unattributed_conversions",
+                          "label": "Unattributed Conversions"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "100",
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "Count"
+                  },
+                  "name": "Attr Count Join Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.total_conversions), attributed_conversions = toreal(customDimensions.total_conversions) - toreal(customDimensions.total_unattributed_conversions), unattributed_conversions = toreal(customDimensions.total_unattributed_conversions)\n| where task_name == \"Attribution Join\"\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions\n| summarize total_conversions = sum(total_conversions), attributed_conversions = sum(attributed_conversions), unattributed_conversions = sum(unattributed_conversions) by timestamp = bin(timestamp, {Bin})\n| extend attributed_percentage = attributed_conversions/total_conversions*100, unattributed_percentage = unattributed_conversions/total_conversions*100\n| project timestamp, attributed_percentage, unattributed_percentage",
+                    "size": 0,
+                    "aggregation": 3,
+                    "title": "Attribution Percentile",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "exportFieldName": "",
+                    "exportParameterName": "PerRow",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 1,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "100",
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "Percentile"
+                  },
+                  "name": "Attr Perc Join Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.total_conversions), attributed_conversions = toreal(customDimensions.total_conversions) - toreal(customDimensions.total_unattributed_conversions), unattributed_conversions = toreal(customDimensions.total_unattributed_conversions)\n| where task_name == \"Attribution Join\" and timestamp >= datetime_add('Minute', -1, extractjson(\"$.x\", '{PerRow}', typeof(datetime))) and timestamp <= datetime_add('Minute', case({Bin} == '1h', 60, {Bin} == '30m', 30, {Bin} == '10m', 10, 5), extractjson(\"$.x\", '{PerRow}', typeof(datetime)))\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions, run_id = customDimensions.job_run_id\n| extend attributed_percentage = attributed_conversions/total_conversions*100, unattributed_percentage = unattributed_conversions/total_conversions*100\n| order by timestamp asc\n",
+                    "size": 1,
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "exportParameterName": "RowL2",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "PerRow",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Join Sub Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where customDimensions.job_run_id == extractjson(\"$.run_id\", '{RowL2}', typeof(string))\n| project timestamp, message, log=customDimensions\n| order by timestamp asc",
+                    "size": 0,
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "RowL2",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Join Line Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.total_conversions), attributed_conversions = toreal(customDimensions.total_conversions) - toreal(customDimensions.total_unattributed_conversions), unattributed_conversions = toreal(customDimensions.total_unattributed_conversions)\n| where task_name == \"Attribution Join\"\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions\n| summarize total_conversions = sum(total_conversions)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300), attributed_conversions = sum(attributed_conversions)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300), unattributed_conversions = sum(unattributed_conversions)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300) by timestamp = bin(timestamp, {Bin})\n| order by timestamp asc",
+                    "size": 0,
+                    "aggregation": 3,
+                    "title": "Attribution QPS",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "qps"
+                  },
+                  "name": "Join Attribution qps"
+                }
+              ]
+            },
+            "name": "Join Attribution Group"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Rule Match Attribution Status Summary",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "bfd48357-31cf-46f0-bc79-7297c0932f0e",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeRange",
+                        "label": "Time Range",
+                        "type": 4,
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 604800000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            }
+                          ]
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "51446622-7a29-4bb8-aae8-66acb9c84814",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Bin",
+                        "type": 2,
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n    {\"label\": \"5min\", \"value\": \"5m\"},\n    {\"label\": \"10min\", \"value\": \"10m\"},\n    {\"label\": \"30min\", \"value\": \"30m\"},\n    {\"label\": \"1hour\", \"value\": \"1h\"}\n]"
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "name": "Rule Match Attribution Parameters"
+                },
+                {
+                  "type": 11,
+                  "content": {
+                    "version": "LinkItem/1.0",
+                    "style": "tabs",
+                    "links": [
+                      {
+                        "id": "de72a789-1c67-4e41-a25a-d7a69c81bbc0",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "Count",
+                        "subTarget": "Count",
+                        "style": "link"
+                      },
+                      {
+                        "id": "9898806f-53d7-4d9b-9f44-2cb0db493fec",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "Percentile",
+                        "subTarget": "Percentile",
+                        "style": "link"
+                      },
+                      {
+                        "id": "05c13da5-5a51-46ce-8d45-6a56781b5bea",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "qps",
+                        "subTarget": "qps",
+                        "style": "link"
+                      }
+                    ]
+                  },
+                  "name": "Rule Match Tabs"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.attributed_conv_count)+toreal(customDimensions.unattributed_conv_count), attributed_conversions = toreal(customDimensions.attributed_conv_count), unattributed_conversions = toreal(customDimensions.unattributed_conv_count)\n| where task_name == \"attributionV2_rule_match\"\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions\n| summarize total_conversions = sum(total_conversions), attributed_conversions = sum(attributed_conversions), unattributed_conversions = sum(unattributed_conversions) by timestamp = bin(timestamp, {Bin})",
+                    "size": 0,
+                    "title": "Attribution Count",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "total_conversions",
+                          "label": "Total Conversions"
+                        },
+                        {
+                          "seriesName": "attributed_conversions",
+                          "label": "Attributed Conversions"
+                        },
+                        {
+                          "seriesName": "unattributed_conversions",
+                          "label": "Unattributed Conversions"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "100",
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "Count"
+                  },
+                  "name": "Attr Count Rule Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.attributed_conv_count)+toreal(customDimensions.unattributed_conv_count), attributed_conversions = toreal(customDimensions.attributed_conv_count), unattributed_conversions = toreal(customDimensions.unattributed_conv_count)\n| where task_name == \"attributionV2_rule_match\"\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions\n| summarize total_conversions = sum(total_conversions), attributed_conversions = sum(attributed_conversions), unattributed_conversions = sum(unattributed_conversions) by timestamp = bin(timestamp, {Bin})\n| extend attributed_percentage = attributed_conversions/total_conversions*100, unattributed_percentage = unattributed_conversions/total_conversions*100\n| project timestamp, attributed_percentage, unattributed_percentage",
+                    "size": 0,
+                    "aggregation": 3,
+                    "title": "Attribution Percentile",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "exportParameterName": "Row",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 1,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "100",
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "Percentile"
+                  },
+                  "name": "Attr Perc Rule Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.attributed_conv_count)+toreal(customDimensions.unattributed_conv_count), attributed_conversions = toreal(customDimensions.attributed_conv_count), unattributed_conversions = toreal(customDimensions.unattributed_conv_count)\n| where task_name == \"attributionV2_rule_match\" and timestamp >= datetime_add('Minute', -1, extractjson(\"$.x\", '{Row}', typeof(datetime))) and timestamp <= datetime_add('Minute', case({Bin} == '1h', 60, {Bin} == '30m', 30, {Bin} == '10m', 10, 5), extractjson(\"$.x\", '{Row}', typeof(datetime)))\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions, run_id = customDimensions.job_run_id\n| extend attributed_percentage = attributed_conversions/total_conversions*100, unattributed_percentage = unattributed_conversions/total_conversions*100\n| order by timestamp asc",
+                    "size": 1,
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "exportFieldName": "",
+                    "exportParameterName": "RowL2",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "Row",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Rule Match Sub Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where customDimensions.job_run_id == extractjson(\"$.run_id\", '{RowL2}', typeof(string)) and customDimensions.name == 'attributionV2_rule_match'\n| project timestamp, message, log=customDimensions\n| order by timestamp asc",
+                    "size": 0,
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "RowL2",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Rule Match Line Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.attributed_conv_count)+toreal(customDimensions.unattributed_conv_count), attributed_conversions = toreal(customDimensions.attributed_conv_count), unattributed_conversions = toreal(customDimensions.unattributed_conv_count)\n| where task_name == \"attributionV2_rule_match\"\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions\n| summarize total_conversions = sum(total_conversions)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300), attributed_conversions = sum(attributed_conversions)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300), unattributed_conversions = sum(unattributed_conversions)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300) by timestamp = bin(timestamp, {Bin})\n| order by timestamp asc",
+                    "size": 0,
+                    "aggregation": 3,
+                    "title": "Attribution QPS",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "qps"
+                  },
+                  "name": "Rule Match Attribution qps"
+                }
+              ]
+            },
+            "name": "Rule Match Attribution Group"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Redis Read/Write Status",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "465d72ac-3c24-4f0d-b8e5-896b690d63ab",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimeRange",
+                        "label": "Time Range",
+                        "type": 4,
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 604800000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 14400000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            }
+                          ]
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "21141353-ed94-4756-a49b-d1e094e4df36",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Bin",
+                        "type": 2,
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n    {\"label\": \"5min\", \"value\": \"5m\"},\n    {\"label\": \"10min\", \"value\": \"10m\"},\n    {\"label\": \"30min\", \"value\": \"30m\"},\n    {\"label\": \"1hour\", \"value\": \"1h\"}\n]",
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "name": "Redis Parameters"
+                },
+                {
+                  "type": 11,
+                  "content": {
+                    "version": "LinkItem/1.0",
+                    "style": "tabs",
+                    "links": [
+                      {
+                        "id": "de72a789-1c67-4e41-a25a-d7a69c81bbc0",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "Count",
+                        "subTarget": "Count",
+                        "style": "link"
+                      },
+                      {
+                        "id": "05c13da5-5a51-46ce-8d45-6a56781b5bea",
+                        "cellValue": "selTab",
+                        "linkTarget": "parameter",
+                        "linkLabel": "qps",
+                        "subTarget": "qps",
+                        "style": "link"
+                      }
+                    ]
+                  },
+                  "name": "Redis Tabs"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\"\n| extend task_name = customDimensions.name, redis_write = toreal(customDimensions.total_conversions_filtered_redis), redis_read = toreal(customDimensions.total_conversions)\n| where task_name == \"Attribution Join\"\n| project timestamp, redis_read, redis_write\n| summarize redis_read = sum(redis_read)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300), redis_write = sum(redis_write)/case({Bin} == '1h', 3600, {Bin} == '30m', 1800, {Bin} == '10m', 600, 300) by timestamp = bin(timestamp, {Bin})\n| order by timestamp asc",
+                    "size": 0,
+                    "aggregation": 3,
+                    "title": "Redis Read/Write",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "qps"
+                  },
+                  "name": "Redis Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"SUMMARY\"\n| extend task_name = customDimensions.name, redis_write = toreal(customDimensions.total_conversions_filtered_redis), redis_read = toreal(customDimensions.total_conversions)\n| where task_name == \"Attribution Join\"\n| project timestamp, redis_read, redis_write\n| summarize redis_read = sum(redis_read), redis_write = sum(redis_write) by timestamp = bin(timestamp, {Bin})\n| order by timestamp asc",
+                    "size": 0,
+                    "title": "Redis Read/Write",
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "selTab",
+                    "comparison": "isEqualTo",
+                    "value": "Count"
+                  },
+                  "name": "Redies Count Query"
+                }
+              ]
+            },
+            "name": "Redis Read/Write group"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Brand Halo Conversions Summary",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "80dd2862-83df-477e-b645-f1f9e7c4b418",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "BrandRuleName",
+                        "label": "Rule Name",
+                        "type": 2,
+                        "isRequired": true,
+                        "multiSelect": true,
+                        "quote": "'",
+                        "delimiter": ",",
+                        "value": [
+                          "brand-level_30day"
+                        ],
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n{\"value\":\"brand-level_30day\", \"label\":\"brand-level_30day\"},\n{\"value\":\"brand-level_28-day/14-day\", \"label\":\"brand-level_28day\"},\n{\"value\":\"brand-level_14day\", \"label\":\"brand-level_14day\"},\n{\"value\":\"brand-level_7day\", \"label\":\"brand-level_7day\"},\n{\"value\":\"brand-level_1day\", \"label\":\"brand-level_1day\"}\n]",
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "defaultValue": "value::all"
+                      },
+                      {
+                        "id": "958c679e-3a1c-4b24-b3ff-f72fa90a73e7",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "BrandTimeRange",
+                        "label": "Time Range",
+                        "type": 4,
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 604800000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 300000
+                            },
+                            {
+                              "durationMs": 900000
+                            },
+                            {
+                              "durationMs": 1800000
+                            },
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 14400000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            },
+                            {
+                              "durationMs": 5184000000
+                            },
+                            {
+                              "durationMs": 7776000000
+                            }
+                          ]
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "48567b6f-6b91-464c-8fa6-b82e4acef9e8",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Bin",
+                        "type": 2,
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n    {\"label\": \"5min\", \"value\": \"5m\"},\n    {\"label\": \"10min\", \"value\": \"10m\"},\n    {\"label\": \"30min\", \"value\": \"30m\"},\n    {\"label\": \"1hour\", \"value\": \"1h\"},\n    {\"label\": \"2hour\", \"value\": \"2h\"}\n]"
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "name": "Brand Halo Parameters"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS_BY_RULE_NAME\"\n| extend rule_name = tostring(customDimensions.rule_name), cnt = extract_json(\"$.count\", tostring(customDimensions), typeof(int))\n| where rule_name contains \"brand-level\" \n| where rule_name in ({BrandRuleName})\n| project timestamp, cnt, rule_name\n| summarize cnt = sum(cnt) by timestamp = bin(timestamp, {Bin}), rule_name\n",
+                    "size": 0,
+                    "title": "Brand Halo Conversions",
+                    "timeContextFromParameter": "BrandTimeRange",
+                    "showRefreshButton": true,
+                    "exportFieldName": "",
+                    "exportParameterName": "BrandRow",
+                    "showExportToExcel": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "showLegend": true,
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "brand-level_30day",
+                          "label": "Brand Level 30-day"
+                        },
+                        {
+                          "seriesName": "brand-level_28-day/14-day",
+                          "label": "Brand Level 28-day"
+                        },
+                        {
+                          "seriesName": "brand-level_14day",
+                          "label": "Brand Level 14-day"
+                        },
+                        {
+                          "seriesName": "brand-level_7day",
+                          "label": "Brand Level 7-day"
+                        },
+                        {
+                          "seriesName": "brand-level_1day",
+                          "label": "Brand Level 1-day"
+                        }
+                      ]
+                    }
+                  },
+                  "name": "Brand Halo Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS_BY_RULE_NAME\"\n| extend rule_name = tostring(customDimensions.rule_name), cnt = extract_json(\"$.count\", tostring(customDimensions), typeof(int))\n| where rule_name == extractjson(\"$.series\", '{BrandRow}', typeof(string))\n| where timestamp >= extractjson(\"$.x\", '{BrandRow}', typeof(datetime)) and timestamp <= datetime_add('Minute', case({Bin} == '1h', 60, {Bin} == '30m', 30, {Bin} == '10m', 10, {Bin} == '5m', 5, 120), extractjson(\"$.x\", '{BrandRow}', typeof(datetime))) \n| project timestamp, cnt, run_id = customDimensions.job_run_id, task_name = customDimensions.name",
+                    "size": 1,
+                    "timeContextFromParameter": "BrandTimeRange",
+                    "showRefreshButton": true,
+                    "exportParameterName": "BrandRowL2",
+                    "showExportToExcel": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "sortBy": [],
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "brand-level_7day",
+                          "label": "Brand Level 7-day"
+                        },
+                        {
+                          "seriesName": "brand-level_1day",
+                          "label": "Brand Level 1-day"
+                        },
+                        {
+                          "seriesName": "brand-level_14day",
+                          "label": "Brand Level 14-day"
+                        },
+                        {
+                          "seriesName": "brand-level_30day",
+                          "label": "Brand Level 30-day"
+                        },
+                        {
+                          "seriesName": "brand-level_28-day/14-day",
+                          "label": "Brand Level 28-day"
+                        }
+                      ]
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "BrandRow",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Brand Sub Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where customDimensions.job_run_id == extractjson(\"$.run_id\", '{BrandRowL2}', typeof(string)) and customDimensions.name == extractjson(\"$.task_name\", '{BrandRowL2}', typeof(string)) \n| project timestamp, message, log=customDimensions\n| order by timestamp asc\n\n",
+                    "size": 0,
+                    "timeContextFromParameter": "BrandTimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "sortBy": []
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "BrandRowL2",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Brand Line Query"
+                }
+              ]
+            },
+            "name": "Brand Halo Group"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Category Halo Conversions Summary",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "d57676e1-9315-4ab4-9501-4e3f430d60a5",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "CategoryRuleName",
+                        "label": "Rule Name",
+                        "type": 2,
+                        "isRequired": true,
+                        "multiSelect": true,
+                        "quote": "'",
+                        "delimiter": ",",
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n{\"value\":\"L3-category_30-day\", \"label\":\"category-level_30day\"},\n{\"value\":\"L3-category_14-day\", \"label\":\"category-level_14day\"},\n{\"value\":\"L3-category_7-day\", \"label\":\"category-level_7day\"},\n{\"value\":\"L3-category_1-day\", \"label\":\"category-level_1day\"}\n]",
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "defaultValue": "value::all"
+                      },
+                      {
+                        "id": "a495d507-5121-432f-9d73-1919c2109ac5",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "CategoryTimeRange",
+                        "label": "Time Range",
+                        "type": 4,
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 604800000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 1800000
+                            },
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 14400000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            },
+                            {
+                              "durationMs": 1209600000
+                            },
+                            {
+                              "durationMs": 2419200000
+                            },
+                            {
+                              "durationMs": 2592000000
+                            }
+                          ]
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "b757dc1a-a8c4-47b5-bb6c-0d6161ab2df1",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Bin",
+                        "type": 2,
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\n    {\"label\": \"5min\", \"value\": \"5m\"},\n    {\"label\": \"10min\", \"value\": \"10m\"},\n    {\"label\": \"30min\", \"value\": \"30m\"},\n    {\"label\": \"1hour\", \"value\": \"1h\"},\n    {\"label\": \"2hour\", \"value\": \"2h\"}\n]",
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "name": "category halo parameters"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS_BY_RULE_NAME\"\n| extend rule_name = tostring(customDimensions.rule_name), cnt = extract_json(\"$.count\", tostring(customDimensions), typeof(int))\n| where rule_name contains \"L3-category\" \n| where rule_name in ({CategoryRuleName})\n| project timestamp, cnt, rule_name\n| summarize cnt = sum(cnt) by timestamp = bin(timestamp, {Bin}), rule_name",
+                    "size": 0,
+                    "title": "Category Halo Conversions",
+                    "timeContextFromParameter": "CategoryTimeRange",
+                    "showRefreshButton": true,
+                    "exportParameterName": "CategoryRow",
+                    "showExportToExcel": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "showLegend": true,
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "L3-category_30-day",
+                          "label": "Category Level 30-day"
+                        },
+                        {
+                          "seriesName": "L3-category_14-day",
+                          "label": "Category Level 14-day"
+                        },
+                        {
+                          "seriesName": "L3-category_7-day",
+                          "label": "Category Level 7-day"
+                        },
+                        {
+                          "seriesName": "L3-category_1-day",
+                          "label": "Category Level 1-day"
+                        }
+                      ]
+                    }
+                  },
+                  "name": "Category Halo Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS_BY_RULE_NAME\"\n| extend rule_name = tostring(customDimensions.rule_name), cnt = extract_json(\"$.count\", tostring(customDimensions), typeof(int))\n| where rule_name == extractjson(\"$.series\", '{CategoryRow}', typeof(string))\n| where timestamp >= extractjson(\"$.x\", '{CategoryRow}', typeof(datetime)) and timestamp <= datetime_add('Minute', case({Bin} == '1h', 60, {Bin} == '30m', 30, {Bin} == '10m', 10, {Bin} == '5m', 5, 120), extractjson(\"$.x\", '{CategoryRow}', typeof(datetime)))\n| project timestamp, cnt, run_id = customDimensions.job_run_id, task_name = customDimensions.name\n| order by timestamp asc",
+                    "size": 1,
+                    "timeContextFromParameter": "CategoryTimeRange",
+                    "showRefreshButton": true,
+                    "exportFieldName": "",
+                    "exportParameterName": "CategoryRowL2",
+                    "showExportToExcel": true,
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "L3-category_1-day",
+                          "label": "Category Level 1-day"
+                        },
+                        {
+                          "seriesName": "L3-category_7-day",
+                          "label": "Category Level 7-day"
+                        },
+                        {
+                          "seriesName": "L3-category_14-day",
+                          "label": "Category Level 14-day"
+                        },
+                        {
+                          "seriesName": "L3-category_30-day",
+                          "label": "Category Level 30-day"
+                        }
+                      ]
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "CategoryRow",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "Category Sub Query"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where customDimensions.job_run_id == extractjson(\"$.run_id\", '{CategoryRowL2}', typeof(string)) and customDimensions.name == extractjson(\"$.task_name\", '{CategoryRowL2}', typeof(string)) \n| project timestamp, message, log=customDimensions\n| order by timestamp asc\n\n",
+                    "size": 0,
+                    "timeContextFromParameter": "CategoryTimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "CategoryRowL2",
+                    "comparison": "isNotEqualTo"
+                  },
+                  "name": "category line query"
+                }
+              ]
+            },
+            "name": "Category Halo Group"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Attribution Watermark Delay",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "e1d1c5c7-ddb3-46de-a620-157f9bd004c5",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Publisher",
+                        "type": 2,
+                        "description": "Publishers to display",
+                        "isRequired": true,
+                        "multiSelect": true,
+                        "quote": "",
+                        "delimiter": ",",
+                        "value": [
+                          "value::all"
+                        ],
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "selectAllValue": "publisher_0,publisher_4,publisher_5,publisher_6,publisher_7,publisher_8,publisher_9,publisher_10,publisher_11,publisher_12,publisher_13,publisher_14,publisher_15,publisher_16,publisher_17,publisher_18,publisher_19,publisher_20,publisher_21,publisher_22",
+                          "showDefault": false
+                        },
+                        "jsonData": "[\n{\"value\":\"publisher_0\", \"label\":\"publisher_0\"},\n{\"value\":\"publisher_4\", \"label\":\"publisher_4\"},\n{\"value\":\"publisher_5\", \"label\":\"publisher_5\"},\n{\"value\":\"publisher_6\", \"label\":\"publisher_6\"},\n{\"value\":\"publisher_7\", \"label\":\"publisher_7\"},\n{\"value\":\"publisher_8\", \"label\":\"publisher_8\"},\n{\"value\":\"publisher_9\", \"label\":\"publisher_9\"},\n{\"value\":\"publisher_10\", \"label\":\"publisher_10\"},\n{\"value\":\"publisher_11\", \"label\":\"publisher_11\"},\n{\"value\":\"publisher_12\", \"label\":\"publisher_12\"},\n{\"value\":\"publisher_13\", \"label\":\"publisher_13\"},\n{\"value\":\"publisher_14\", \"label\":\"publisher_14\"},\n{\"value\":\"publisher_15\", \"label\":\"publisher_15\"},\n{\"value\":\"publisher_16\", \"label\":\"publisher_16\"},\n{\"value\":\"publisher_17\", \"label\":\"publisher_17\"},\n{\"value\":\"publisher_18\", \"label\":\"publisher_18\"},\n{\"value\":\"publisher_19\", \"label\":\"publisher_19\"},\n{\"value\":\"publisher_20\", \"label\":\"publisher_20\"},\n{\"value\":\"publisher_21\", \"label\":\"publisher_21\"},\n{\"value\":\"publisher_22\", \"label\":\"publisher_22\"}\n]\n",
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "defaultValue": "value::all"
+                      },
+                      {
+                        "id": "0a263dbd-2ebb-4ad4-b8e9-92a6ee6c2967",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimePeriod",
+                        "type": 4,
+                        "description": "Time Period",
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 86400000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            }
+                          ],
+                          "allowCustom": true
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "c32aa2fb-7480-4704-9673-b8318800aea7",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Aggregate",
+                        "type": 2,
+                        "description": "Aggregate period",
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\r\n    {\"label\": \"5min\", \"value\": \"5m\"},\r\n    {\"label\": \"10min\", \"value\": \"10m\"},\r\n    {\"label\": \"30min\", \"value\": \"30m\"},\r\n    {\"label\": \"1hour\", \"value\": \"1h\"}\r\n]"
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "customWidth": "100",
+                  "name": "parameters-general"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == 'IMPRESSION_WATERMARK_DELAY'\n| extend task_name = customDimensions.name, delay_time = toreal(customDimensions.delay_time), publisher_id = strcat('publisher_', tostring(customDimensions.publisher_id))\n| where '{Publisher}' has publisher_id\n| project timestamp, delay_time, publisher_id\n| summarize avg(delay_time) by bin(timestamp, {Aggregate}), publisher_id\n",
+                    "size": 0,
+                    "aggregation": 3,
+                    "showAnnotations": true,
+                    "title": "Impression Watermark Delay",
+                    "timeContextFromParameter": "TimePeriod",
+                    "exportedParameters": [
+                      {
+                        "parameterName": "Row",
+                        "parameterType": 5
+                      }
+                    ],
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "tileSettings": {
+                      "showBorder": false,
+                      "titleContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "leftContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 12,
+                        "formatOptions": {
+                          "palette": "auto"
+                        },
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "graphSettings": {
+                      "type": 0,
+                      "topContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "centerContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 1,
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "chartSettings": {
+                      "showLegend": true,
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 24,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    },
+                    "mapSettings": {
+                      "locInfo": "LatLong",
+                      "sizeSettings": "avg_delay_time",
+                      "sizeAggregation": "Sum",
+                      "legendMetric": "avg_delay_time",
+                      "legendAggregation": "Sum",
+                      "itemColorSettings": {
+                        "type": "heatmap",
+                        "colorAggregation": "Sum",
+                        "nodeColorField": "avg_delay_time",
+                        "heatmapPalette": "greenRed"
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-impression-watermark-delay",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == 'CLICK_WATERMARK_DELAY'\n| extend task_name = customDimensions.name, delay_time = toreal(customDimensions.delay_time), publisher_id = strcat('publisher_', tostring(customDimensions.publisher_id))\n| where '{Publisher}' has publisher_id\n| project timestamp, delay_time, publisher_id\n| summarize avg(delay_time) by bin(timestamp, {Aggregate}), publisher_id\n",
+                    "size": 0,
+                    "aggregation": 3,
+                    "showAnnotations": true,
+                    "title": "Click Watermark Delay",
+                    "timeContextFromParameter": "TimePeriod",
+                    "exportedParameters": [
+                      {
+                        "parameterName": "Row",
+                        "parameterType": 5
+                      }
+                    ],
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "tileSettings": {
+                      "showBorder": false,
+                      "titleContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "leftContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 12,
+                        "formatOptions": {
+                          "palette": "auto"
+                        },
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "graphSettings": {
+                      "type": 0,
+                      "topContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "centerContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 1,
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "chartSettings": {
+                      "showLegend": true,
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 24,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    },
+                    "mapSettings": {
+                      "locInfo": "LatLong",
+                      "sizeSettings": "avg_delay_time",
+                      "sizeAggregation": "Sum",
+                      "legendMetric": "avg_delay_time",
+                      "legendAggregation": "Sum",
+                      "itemColorSettings": {
+                        "type": "heatmap",
+                        "colorAggregation": "Sum",
+                        "nodeColorField": "avg_delay_time",
+                        "heatmapPalette": "greenRed"
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-click-watermark-delay",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == 'JOIN_WATERMARK_DELAY'\n| extend task_name = customDimensions.name, delay_time = toreal(customDimensions.delay_time), publisher_id = strcat('publisher_', tostring(customDimensions.publisher_id))\n| where '{Publisher}' has publisher_id\n| project timestamp, delay_time, publisher_id\n| summarize avg(delay_time) by bin(timestamp, {Aggregate}), publisher_id\n",
+                    "size": 0,
+                    "aggregation": 3,
+                    "showAnnotations": true,
+                    "title": "Join Watermark Delay",
+                    "timeContextFromParameter": "TimePeriod",
+                    "exportedParameters": [
+                      {
+                        "parameterName": "Row",
+                        "parameterType": 5
+                      }
+                    ],
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "tileSettings": {
+                      "showBorder": false,
+                      "titleContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "leftContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 12,
+                        "formatOptions": {
+                          "palette": "auto"
+                        },
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "graphSettings": {
+                      "type": 0,
+                      "topContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "centerContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 1,
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "chartSettings": {
+                      "showLegend": true,
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 24,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    },
+                    "mapSettings": {
+                      "locInfo": "LatLong",
+                      "sizeSettings": "avg_delay_time",
+                      "sizeAggregation": "Sum",
+                      "legendMetric": "avg_delay_time",
+                      "legendAggregation": "Sum",
+                      "itemColorSettings": {
+                        "type": "heatmap",
+                        "colorAggregation": "Sum",
+                        "nodeColorField": "avg_delay_time",
+                        "heatmapPalette": "greenRed"
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-join-watermark-delay",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\n| where message == 'ATTR_RULE_MATCH_WATERMARK_DELAY'\n| extend task_name = customDimensions.name, delay_time = toreal(customDimensions.delay), publisher_id = strcat('publisher_', tostring(customDimensions.publisher_id))\n| where '{Publisher}' has publisher_id\n| project timestamp, delay_time, publisher_id\n| summarize avg(delay_time) by bin(timestamp, {Aggregate}), publisher_id\n",
+                    "size": 0,
+                    "aggregation": 3,
+                    "showAnnotations": true,
+                    "title": "Rule Match Watermark Delay",
+                    "timeContextFromParameter": "TimePeriod",
+                    "exportedParameters": [
+                      {
+                        "parameterName": "Row",
+                        "parameterType": 5
+                      }
+                    ],
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "tileSettings": {
+                      "showBorder": false,
+                      "titleContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "leftContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 12,
+                        "formatOptions": {
+                          "palette": "auto"
+                        },
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "graphSettings": {
+                      "type": 0,
+                      "topContent": {
+                        "columnMatch": "publisher_id",
+                        "formatter": 1
+                      },
+                      "centerContent": {
+                        "columnMatch": "avg_delay_time",
+                        "formatter": 1,
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    },
+                    "chartSettings": {
+                      "showLegend": true,
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 24,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    },
+                    "mapSettings": {
+                      "locInfo": "LatLong",
+                      "sizeSettings": "avg_delay_time",
+                      "sizeAggregation": "Sum",
+                      "legendMetric": "avg_delay_time",
+                      "legendAggregation": "Sum",
+                      "itemColorSettings": {
+                        "type": "heatmap",
+                        "colorAggregation": "Sum",
+                        "nodeColorField": "avg_delay_time",
+                        "heatmapPalette": "greenRed"
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-rule-match-watermark-delay",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                }
+              ]
+            },
+            "name": "group-watermark-delay"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Attribution Validation Diff",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "e1d1c5c7-ddb3-46de-a620-157f9bd004c5",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Publisher",
+                        "type": 2,
+                        "description": "Publishers to display",
+                        "isRequired": true,
+                        "multiSelect": true,
+                        "quote": "",
+                        "delimiter": ",",
+                        "typeSettings": {
+                          "additionalResourceOptions": [
+                            "value::all"
+                          ],
+                          "selectAllValue": "publisher_0,publisher_4,publisher_5,publisher_6,publisher_7,publisher_8,publisher_9,publisher_10,publisher_11,publisher_12,publisher_13,publisher_14,publisher_15,publisher_16,publisher_17,publisher_18,publisher_19,publisher_20,publisher_21,publisher_22,publisher_other",
+                          "showDefault": false
+                        },
+                        "jsonData": "[\n{\"value\":\"publisher_0\", \"label\":\"publisher_0\"},\n{\"value\":\"publisher_4\", \"label\":\"publisher_4\"},\n{\"value\":\"publisher_5\", \"label\":\"publisher_5\"},\n{\"value\":\"publisher_6\", \"label\":\"publisher_6\"},\n{\"value\":\"publisher_7\", \"label\":\"publisher_7\"},\n{\"value\":\"publisher_8\", \"label\":\"publisher_8\"},\n{\"value\":\"publisher_9\", \"label\":\"publisher_9\"},\n{\"value\":\"publisher_10\", \"label\":\"publisher_10\"},\n{\"value\":\"publisher_11\", \"label\":\"publisher_11\"},\n{\"value\":\"publisher_12\", \"label\":\"publisher_12\"},\n{\"value\":\"publisher_13\", \"label\":\"publisher_13\"},\n{\"value\":\"publisher_14\", \"label\":\"publisher_14\"},\n{\"value\":\"publisher_15\", \"label\":\"publisher_15\"},\n{\"value\":\"publisher_16\", \"label\":\"publisher_16\"},\n{\"value\":\"publisher_17\", \"label\":\"publisher_17\"},\n{\"value\":\"publisher_18\", \"label\":\"publisher_18\"},\n{\"value\":\"publisher_19\", \"label\":\"publisher_19\"},\n{\"value\":\"publisher_20\", \"label\":\"publisher_20\"},\n{\"value\":\"publisher_21\", \"label\":\"publisher_21\"},\n{\"value\":\"publisher_22\", \"label\":\"publisher_22\"},\n{\"value\":\"publisher_other\", \"label\":\"publisher_other\"}\n]\n",
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "defaultValue": "value::all"
+                      },
+                      {
+                        "id": "0a263dbd-2ebb-4ad4-b8e9-92a6ee6c2967",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimePeriod",
+                        "type": 4,
+                        "description": "Time Period",
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 86400000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            }
+                          ],
+                          "allowCustom": true
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "c32aa2fb-7480-4704-9673-b8318800aea7",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Aggregate",
+                        "type": 2,
+                        "description": "Aggregate period",
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\r\n    {\"label\": \"5min\", \"value\": \"5m\"},\r\n    {\"label\": \"10min\", \"value\": \"10m\"},\r\n    {\"label\": \"30min\", \"value\": \"30m\"},\r\n    {\"label\": \"1hour\", \"value\": \"1h\"}\r\n]"
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "customWidth": "100",
+                  "name": "parameters-general"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\r\n| where message == \"ATTR_DATA_VALIDATION_RESULT_BY_PUBLISHER\"\r\n| extend unknown_diff_percent = toreal(customDimensions.unknown_diff_percent) * 100, publisher_id = strcat('publisher_', tostring(customDimensions.publisher_id))\r\n| where '{Publisher}' has publisher_id\r\n| project timestamp, unknown_diff_percent, publisher_id\r\n| summarize max(unknown_diff_percent) by bin(timestamp, {Aggregate}), publisher_id",
+                    "size": 0,
+                    "aggregation": 2,
+                    "showAnnotations": true,
+                    "timeContextFromParameter": "TimePeriod",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "showLegend": true,
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 1,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "showPin": false,
+                  "name": "query-attribution-validation-diff"
+                }
+              ]
+            },
+            "name": "group-attribution-validation-diff"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Raw Data Inputs",
+              "items": [
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "0a263dbd-2ebb-4ad4-b8e9-92a6ee6c2967",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "TimePeriod",
+                        "type": 4,
+                        "description": "Time Period",
+                        "isRequired": true,
+                        "value": {
+                          "durationMs": 259200000
+                        },
+                        "typeSettings": {
+                          "selectableValues": [
+                            {
+                              "durationMs": 3600000
+                            },
+                            {
+                              "durationMs": 43200000
+                            },
+                            {
+                              "durationMs": 86400000
+                            },
+                            {
+                              "durationMs": 172800000
+                            },
+                            {
+                              "durationMs": 259200000
+                            },
+                            {
+                              "durationMs": 604800000
+                            }
+                          ],
+                          "allowCustom": true
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        }
+                      },
+                      {
+                        "id": "c32aa2fb-7480-4704-9673-b8318800aea7",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "Aggregate",
+                        "type": 2,
+                        "description": "Aggregate period",
+                        "isRequired": true,
+                        "value": "1h",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "jsonData": "[[\r\n    {\"label\": \"5min\", \"value\": \"5m\"},\r\n    {\"label\": \"10min\", \"value\": \"10m\"},\r\n    {\"label\": \"30min\", \"value\": \"30m\"},\r\n    {\"label\": \"1hour\", \"value\": \"1h\"}\r\n]"
+                      }
+                    ],
+                    "style": "above",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components"
+                  },
+                  "customWidth": "100",
+                  "name": "parameters-general"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\r\n| where message == \"TOTAL impression\"\r\n| extend task_name = customDimensions.name, num_count = toreal(customDimensions.size), item = \"Impressions\"\r\n| where task_name == \"Attribution Click And Imp Preprocess\"\r\n| project timestamp, task_name, num_count, item\r\n| sort by timestamp desc\r\n| summarize sum(num_count) by bin(timestamp, {Aggregate}), item",
+                    "size": 0,
+                    "showAnnotations": true,
+                    "title": "Impressions",
+                    "timeContextFromParameter": "TimePeriod",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 17,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true,
+                            "maximumFractionDigits": 2
+                          },
+                          "missingSparkDataOption": "Zero"
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-impressions",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\r\n| where message == \"TOTAL click\"\r\n| extend task_name = customDimensions.name, num_count = toreal(customDimensions.size), item = \"Clicks\"\r\n| where task_name == \"Attribution Click And Imp Preprocess\"\r\n| project timestamp, task_name, num_count, item\r\n| sort by timestamp desc\r\n| summarize sum(num_count) by bin(timestamp, {Aggregate}), item",
+                    "size": 0,
+                    "showAnnotations": true,
+                    "title": "Clicks",
+                    "timeContextFromParameter": "TimePeriod",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "Clicks",
+                          "color": "orange"
+                        }
+                      ],
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 17,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true,
+                            "maximumFractionDigits": 2
+                          },
+                          "missingSparkDataOption": "Zero"
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-clicks",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\r\n| where message == \"SUMMARY\"\r\n| extend task_name = customDimensions.name, num_count = toreal(customDimensions.total_conversions), item = \"Raw Conversions\"\r\n| where task_name == \"Attribution Conv Preprocess\"\r\n| project timestamp, task_name, num_count, item\r\n| summarize sum(num_count) by bin(timestamp, {Aggregate}), item",
+                    "size": 0,
+                    "showAnnotations": true,
+                    "title": "Conversions",
+                    "color": "pink",
+                    "timeContextFromParameter": "TimePeriod",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "Clicks",
+                          "color": "orange"
+                        }
+                      ],
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 17,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true,
+                            "maximumFractionDigits": 2
+                          },
+                          "missingSparkDataOption": "Zero"
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-raw-conversions",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "traces\r\n| where message == \"SUMMARY\"\r\n| extend task_name = customDimensions.name, num_count = toreal(customDimensions.total_conversions), item = \"Raw Conversions\"\r\n| where task_name == \"Attribution Conv Preprocess\"\r\n| project timestamp, task_name, num_count, item\r\n| union (\r\ntraces\r\n| where message == \"TOTAL impression\"\r\n| extend task_name = customDimensions.name, num_count = toreal(customDimensions.size), item = \"Impressions\"\r\n| where task_name == \"Attribution Click And Imp Preprocess\"\r\n| project timestamp, task_name, num_count, item)\r\n| union (\r\ntraces\r\n| where message == \"TOTAL click\"\r\n| extend task_name = customDimensions.name, num_count = toreal(customDimensions.size), item = \"Clicks\"\r\n| where task_name == \"Attribution Click And Imp Preprocess\"\r\n| project timestamp, task_name, num_count, item)\r\n| sort by timestamp desc\r\n| summarize sum(num_count) by bin(timestamp, {Aggregate}), item\r\n",
+                    "size": 0,
+                    "showAnnotations": true,
+                    "title": "Combine",
+                    "color": "pink",
+                    "timeContextFromParameter": "TimePeriod",
+                    "queryType": 0,
+                    "resourceType": "microsoft.insights/components",
+                    "visualization": "linechart",
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "Clicks",
+                          "color": "orange"
+                        },
+                        {
+                          "seriesName": "Impressions",
+                          "color": "blue"
+                        },
+                        {
+                          "seriesName": "Raw Conversions",
+                          "color": "pink"
+                        }
+                      ],
+                      "showDataPoints": true,
+                      "ySettings": {
+                        "numberFormatSettings": {
+                          "unit": 17,
+                          "options": {
+                            "style": "decimal",
+                            "useGrouping": true,
+                            "maximumFractionDigits": 2
+                          },
+                          "missingSparkDataOption": "Zero"
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "name": "query-combine",
+                  "styleSettings": {
+                    "maxWidth": "50%"
+                  }
+                }
+              ]
+            },
+            "name": "group-impressions-clicks-conversions"
+          }
+        ],
+        "isLocked": false,
+        "fallbackResourceIds": [
+          "/subscriptions/949ee4ba-5c35-470e-8128-7c70c8746af4/resourceGroups/staging-data-etl-iad-dbw-main-rg/providers/Microsoft.Insights/components/staging-data-etl-iad-dbw-main-appinsights"
+        ]
+      }
+    },
+    "resources": [
+      {
+        "name": "[parameters('workbookId')]",
+        "type": "microsoft.insights/workbooks",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2021-03-08",
+        "dependsOn": [],
+        "kind": "shared",
+        "properties": {
+          "displayName": "[parameters('workbookDisplayName')]",
+          "serializedData": "[string(variables('workbookContent'))]",
+          "version": "1.0",
+          "sourceId": "[parameters('workbookSourceId')]",
+          "category": "[parameters('workbookType')]"
+        }
+      }
+    ],
+    "outputs": {
+      "workbookId": {
+        "type": "string",
+        "value": "[resourceId( 'microsoft.insights/workbooks', parameters('workbookId'))]"
+      }
+    },
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#"
+  }
