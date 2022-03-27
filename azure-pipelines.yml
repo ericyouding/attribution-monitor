@@ -20,6 +20,6 @@ steps:
     location: 'East US'
     templateLocation: 'URL of the file'
     csmFileLink: 'https://raw.githubusercontent.com/ericyouding/attribution-monitor/main/template/azuredeploy.json'
-    overrideParameters: '-projectName data-test'
+    overrideParameters: '-projectName fc94814c-7044-4bb7-8fe8-4d3506b109f2'
     deploymentMode: 'Incremental'
     deploymentName: 'DeployPipelineTemplate'
