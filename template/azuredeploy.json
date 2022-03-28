@@ -17,7 +17,7 @@
       },
       "workbookSourceId": {
         "type": "string",
-        "defaultValue": "/subscriptions/949ee4ba-5c35-470e-8128-7c70c8746af4/resourceGroups/staging-data-etl-iad-dbw-main-rg/providers/Microsoft.Insights/components/staging-data-etl-iad-dbw-main-appinsights",
+        "defaultValue": "/subscriptions/b558a354-8f0b-4461-8876-9d1e8b56360f/resourceGroups/a-attribution-eus-peered-rg/providers/Microsoft.Insights/components/a-attribution-eus-peered-appinsights",
         "metadata": {
           "description": "The id of resource instance to which the workbook will be associated"
         }
