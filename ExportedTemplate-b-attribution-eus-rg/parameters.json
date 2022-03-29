@@ -1,0 +1,15 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "scheduledqueryrules_Rule_Match_Attribution_Abnormal_name": {
+            "value": null
+        },
+        "components_b_attribution_eus_appinsights_externalid": {
+            "value": null
+        },
+        "actionGroups_Attribution_BJ_Dev_externalid": {
+            "value": null
+        }
+    }
+}

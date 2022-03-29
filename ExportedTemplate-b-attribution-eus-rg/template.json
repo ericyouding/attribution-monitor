@@ -1,0 +1,62 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "scheduledqueryrules_Rule_Match_Attribution_Abnormal_name": {
+            "defaultValue": "Rule Match Attribution Abnormal",
+            "type": "String"
+        },
+        "components_b_attribution_eus_appinsights_externalid": {
+            "defaultValue": "/subscriptions/949ee4ba-5c35-470e-8128-7c70c8746af4/resourceGroups/b-attribution-eus-rg/providers/microsoft.insights/components/b-attribution-eus-appinsights",
+            "type": "String"
+        },
+        "actionGroups_Attribution_BJ_Dev_externalid": {
+            "defaultValue": "/subscriptions/11c1dcc6-71c7-42c2-b842-15f022dd9b44/resourceGroups/prod-attribution-eus-rg/providers/microsoft.insights/actionGroups/Attribution BJ Dev",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "microsoft.insights/scheduledqueryrules",
+            "apiVersion": "2021-08-01",
+            "name": "[parameters('scheduledqueryrules_Rule_Match_Attribution_Abnormal_name')]",
+            "location": "eastus",
+            "properties": {
+                "displayName": "[parameters('scheduledqueryrules_Rule_Match_Attribution_Abnormal_name')]",
+                "description": "Alerts when Attributed Conversion Percentile Below the threshold (50%) for Rule Match activity. Ignore the time span when we have too few conversion points.",
+                "severity": 2,
+                "enabled": true,
+                "evaluationFrequency": "PT5M",
+                "scopes": [
+                    "[parameters('components_b_attribution_eus_appinsights_externalid')]"
+                ],
+                "targetResourceTypes": [
+                    "microsoft.insights/components"
+                ],
+                "windowSize": "PT5M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "query": "traces\n| where message == \"ATTR_RULE_MATCH_RULE_MATCHED_RESULT_ANALYSIS\"\n| extend task_name = customDimensions.name, total_conversions = toreal(customDimensions.attributed_conv_count) + toreal(customDimensions.unattributed_conv_count), attributed_conversions = toreal(customDimensions.attributed_conv_count), unattributed_conversions = toreal(customDimensions.unattributed_conv_count)\n| where task_name == \"attributionV2_rule_match\" and timestamp > ago(5m)\n| project timestamp, total_conversions, attributed_conversions, unattributed_conversions\n| summarize total_conversions = sum(total_conversions), attributed_conversions = sum(attributed_conversions), unattributed_conversions = sum(unattributed_conversions)\n| extend attributed_percentage = attributed_conversions / total_conversions * 100, unattributed_percentage = unattributed_conversions / total_conversions * 100\n| where attributed_percentage < 50 and total_conversions > 10 \n| project attributed_percentage, unattributed_percentage",
+                            "timeAggregation": "Count",
+                            "dimensions": [],
+                            "operator": "GreaterThan",
+                            "threshold": 0,
+                            "failingPeriods": {
+                                "numberOfEvaluationPeriods": 1,
+                                "minFailingPeriodsToAlert": 1
+                            }
+                        }
+                    ]
+                },
+                "autoMitigate": true,
+                "actions": {
+                    "actionGroups": [
+                        "[parameters('actionGroups_Attribution_BJ_Dev_externalid')]"
+                    ]
+                }
+            }
+        }
+    ]
+}
