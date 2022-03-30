@@ -5,6 +5,7 @@
 
 trigger:
 - main
+- jingyuan-test
 
 pool:
   vmImage: ubuntu-latest
